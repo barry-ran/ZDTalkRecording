@@ -1,5 +1,13 @@
 ﻿#include "platform.h"
 
+#include <QSettings>
+
+#include <mmdeviceapi.h>
+#include <audiopolicy.h>
+#include <util/windows/WinHandle.hpp>
+#include <util/windows/HRError.hpp>
+#include <util/windows/ComPtr.hpp>
+
 BOOL IsOS64Bit()
 {
     BOOL b64Bit = FALSE;
@@ -80,159 +88,15 @@ void GetVersionNumbers(DWORD &dwMajorVer, DWORD &dwMinorVer, DWORD &dwBuildNumbe
     */
 }
 
-#include <QSettings>
-#include <QScreen>
-#include <d3d11.h>
-#include <dxgi.h>
-#pragma comment(lib,"d3d11.lib")
-#pragma comment(lib,"dxgi.lib")
-
-const static D3D_FEATURE_LEVEL featureLevels[] =
-{
-    D3D_FEATURE_LEVEL_11_0,
-    D3D_FEATURE_LEVEL_10_1,
-    D3D_FEATURE_LEVEL_10_0,
-    D3D_FEATURE_LEVEL_9_3,
-};
-
 #define REG_CPU "HKEY_LOCAL_MACHINE\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"
-
-QString OSInfo()
-{
-    return QSysInfo::prettyProductName();
-}
 
 QString CPUInfo()
 {
-#ifdef Q_OS_WIN
     QSettings cpu(REG_CPU, QSettings::NativeFormat);
     QString cpuString = cpu.value("ProcessorNameString").toString();
     return cpuString;
-#else
-    return "未知";
-#endif
 }
 
-QString MemoryInfo()
-{
-#ifdef Q_OS_WIN
-    MEMORYSTATUSEX statex;
-    statex.dwLength = sizeof (statex);
-    GlobalMemoryStatusEx(&statex);
-
-    double total = statex.ullTotalPhys * 1.0 / GB;
-    return QString::number(total, 'f', 1) + "G";
-#else
-    return "未知";
-#endif
-}
-
-QString DisplayCardInfo(const QScreen *screen)
-{
-    QString d3dLevelString = "未知";
-
-#ifdef Q_OS_WIN
-    IDXGIFactory *pFactory;
-    IDXGIAdapter *pAdapter;
-    std::vector <IDXGIAdapter*>vAdapters;
-
-    int iAdapterNum = 0, index = -1;
-
-    HRESULT hr = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&pFactory));
-    if (FAILED(hr))
-        return d3dLevelString;
-
-    while (pFactory->EnumAdapters(iAdapterNum, &pAdapter) != DXGI_ERROR_NOT_FOUND)
-    {
-        vAdapters.push_back(pAdapter);
-        ++iAdapterNum;
-    }
-
-    for (size_t i = 0; i < vAdapters.size(); i++)
-    {
-        IDXGIOutput *pOutput;
-        std::vector<IDXGIOutput*> vOutputs;
-        int iOutputNum = 0;
-        while (vAdapters[i]->EnumOutputs(iOutputNum, &pOutput) != DXGI_ERROR_NOT_FOUND)
-        {
-            vOutputs.push_back(pOutput);
-            iOutputNum++;
-        }
-
-        for (size_t n = 0; n < vOutputs.size(); n++)
-        {
-            DXGI_OUTPUT_DESC outputDesc;
-            vOutputs[n]->GetDesc(&outputDesc);
-
-            QString devName = QString::fromWCharArray(outputDesc.DeviceName);
-            if (devName == screen->name()) {
-                index = i;
-                i = vAdapters.size() + 1;
-                break;
-            }
-        }
-        vOutputs.clear();
-    }
-
-    if (index == -1) {
-        vAdapters.clear();
-        return d3dLevelString;
-    }
-
-    D3D_FEATURE_LEVEL levelUsed = D3D_FEATURE_LEVEL_9_3;
-    UINT createFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-
-    hr = D3D11CreateDevice(vAdapters[index], D3D_DRIVER_TYPE_UNKNOWN,
-                           NULL, createFlags, featureLevels,
-                           sizeof(featureLevels) / sizeof(D3D_FEATURE_LEVEL),
-                           D3D11_SDK_VERSION, NULL,
-                           &levelUsed, NULL);
-    if (!FAILED(hr))
-    {
-        switch (levelUsed)
-        {
-        case D3D_FEATURE_LEVEL_11_0:
-            d3dLevelString = "11";
-            break;
-        case D3D_FEATURE_LEVEL_10_1:
-            d3dLevelString = "10.1";
-            break;
-        case D3D_FEATURE_LEVEL_10_0:
-            d3dLevelString = "10";
-            break;
-        case D3D_FEATURE_LEVEL_9_3:
-            d3dLevelString = "9.3";
-            break;
-        default:
-            break;
-        }
-    }
-
-    vAdapters.clear();
-
-#endif
-
-    return d3dLevelString;
-}
-
-double GetAvailableMemory()
-{
-#ifdef Q_OS_WIN
-    MEMORYSTATUSEX statex;
-    statex.dwLength = sizeof (statex);
-    GlobalMemoryStatusEx(&statex);
-    return statex.ullAvailPhys * 1.0 / MB;
-#else
-    return 1.0;
-#endif
-}
-
-#ifdef _WIN32
-#include <mmdeviceapi.h>
-#include <audiopolicy.h>
-#include <util/windows/WinHandle.hpp>
-#include <util/windows/HRError.hpp>
-#include <util/windows/ComPtr.hpp>
 bool DisableAudioDucking(bool disable)
 {
     ComPtr<IMMDeviceEnumerator>   devEnum;
@@ -270,4 +134,3 @@ bool DisableAudioDucking(bool disable)
     result = sessionControl2->SetDuckingPreference(disable);
     return SUCCEEDED(result);
 }
-#endif

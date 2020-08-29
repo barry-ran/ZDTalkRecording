@@ -46,9 +46,8 @@ static const char *module_data[] = {
 	"../../data/obs-plugins/%module%"
 };
 
-// Added by zdtalk
+// Added by ZDTalk
 static char app_path[1024] = {0};
-// End
 
 static const int module_patterns_size =
 	sizeof(module_bin)/sizeof(module_bin[0]);
@@ -59,16 +58,12 @@ void add_default_module_paths(void)
 		obs_add_module_path(module_bin[i], module_data[i]);
 }
 
-// Added by zdtalk
 void obs_set_app_path(const char *path)
 {
 	if (!path) return;
 
 	strcpy(app_path, path);
 }
-// End
-
-#include <direct.h>
 
 /* on windows, points to [base directory]/data/libobs */
 char *find_libobs_data_file(const char *file)
@@ -82,7 +77,7 @@ char *find_libobs_data_file(const char *file)
 	if (check_path(file, "../../data/libobs/", &path))
 		return path.array;
 
-	// Added by zdtalk
+    // Added by ZDTalk
 	// check app real absolute path last
 	if (app_path[0]) {
 		char p[1024] = { 0 };
@@ -90,7 +85,7 @@ char *find_libobs_data_file(const char *file)
 		if (check_path(file, p, &path))
 			return path.array;
 	}
-	// End
+    // Added by ZDTalk end
 
 	dstr_free(&path);
 	return NULL;

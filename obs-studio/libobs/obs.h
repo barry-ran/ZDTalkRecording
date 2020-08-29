@@ -371,17 +371,15 @@ EXPORT const char *obs_get_module_data_path(obs_module_t *module);
  */
 EXPORT void obs_add_module_path(const char *bin, const char *data);
 
-// Added by zdtalk
 /**
  * Set app absolute path.
  * Startup from browser, it maybe wrong.
  *
  * @param  path Specifies app absolute path.
- * @author jianggp (zdtalk)
+ * @author ZDTalk
  * @date   2017-09-14
  */
 EXPORT void obs_set_app_path(const char *path);
-// End
 
 /** Automatically loads all modules from module paths (convenience function) */
 EXPORT void obs_load_all_modules(void);

@@ -1,4 +1,21 @@
-﻿#include <QCoreApplication>
+﻿/******************************************************************************
+    Copyright (C) 2020 by Zaodao(Dalian) Education Technology Co., Ltd..
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+******************************************************************************/
+
+#include <QCoreApplication>
 #include <QTextCodec>
 #include <QDateTime>
 #include <QThread>
@@ -185,8 +202,25 @@ static void LogHandler(QtMsgType type, const QMessageLogContext &,
 }
 // [Qt 日志代理]
 
+static void PrintLicense()
+{
+    std::cout << "Copyright (C) 2020 by Zaodao(Dalian) Education Technology Co., Ltd..\n"
+                 "This program is free software: you can redistribute it and/or modify\n"
+                 "it under the terms of the GNU General Public License as published by\n"
+                 "the Free Software Foundation, either version 2 of the License, or\n"
+                 "(at your option) any later version.\n\n"
+                 "This program is distributed in the hope that it will be useful,\n"
+                 "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+                 "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+                 "GNU General Public License for more details.\n\n"
+                 "You should have received a copy of the GNU General Public License\n"
+                 "along with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n";
+}
+
 static void PrintHelpDoc()
 {
+    PrintLicense();
+
     std::cout << "--help, -h: Get list of available commands.\n"
               << "--version, -v: Get current version.\n\n"
               << "--log, -l: Log Output File Path.\n"
@@ -198,6 +232,8 @@ static void PrintHelpDoc()
 
 static void PrintVersion()
 {
+    PrintLicense();
+
     std::cout << "ZDRecording - "
               << ZDRECORDING_VERSION_STR << "\n";
     exit(0);
@@ -273,7 +309,7 @@ int main(int argc, char *argv[])
     info.dwFlags |= CR_INST_NO_GUI;
     // info.dwFlags |= CR_INST_NO_MINIDUMP;
     info.pszDebugHelpDLL = NULL;
-    info.pszEmailTo = "jiangguopeng@izaodao.com";
+    info.pszEmailTo = "your email address"; // fill with your own email
     info.pszEmailSubject = "Recording Crash Report";
     info.pszErrorReportSaveDir =
             strconv.utf82a(g_crashDirPath.toUtf8().constData());

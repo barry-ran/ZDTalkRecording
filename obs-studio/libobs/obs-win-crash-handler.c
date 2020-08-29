@@ -507,9 +507,7 @@ static LONG CALLBACK exception_handler(PEXCEPTION_POINTERS exception)
 
 void initialize_crash_handler(void)
 {
-    // Modified by jianggp 20200623
-	// static bool initialized = false;
-    static bool initialized = true;
+	static bool initialized = false;
 
 	if (!initialized) {
 		SetUnhandledExceptionFilter(exception_handler);

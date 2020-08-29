@@ -77,7 +77,7 @@ bool get_window_exe(struct dstr *name, HWND window)
 	DWORD       id;
 
 	GetWindowThreadProcessId(window, &id);
-    // Commented by jianggp (zdtalk)
+    // Commented by ZDTalk
 	// if (id == GetCurrentProcessId())
     //     return false;
 

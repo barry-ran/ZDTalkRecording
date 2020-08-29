@@ -119,7 +119,7 @@ static obs_properties_t *wc_properties(void *unused)
 
 	p = obs_properties_add_list(ppts, "window", TEXT_WINDOW,
 			OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_STRING);
-    fill_window_list(p, INCLUDE_MINIMIZED/*EXCLUDE_MINIMIZED*/, NULL); // Modified by jianggp (zdtalk)
+    fill_window_list(p, INCLUDE_MINIMIZED/*EXCLUDE_MINIMIZED*/, NULL); // Modified by ZDTalk
 
 	p = obs_properties_add_list(ppts, "priority", TEXT_MATCH_PRIORITY,
 			OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
