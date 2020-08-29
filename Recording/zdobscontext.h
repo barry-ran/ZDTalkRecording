@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-    Copyright (C) 2020 by Zaodao(Dalian) Education Technology Co., Ltd..
+    Copyright (C) 2020 by Zaodao(Dalian) Education Technology Co., Ltd.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,6 +16,10 @@
 ******************************************************************************/
 
 #pragma once
+
+#if _MSC_VER >= 1600
+#pragma execution_character_set("utf-8")
+#endif
 
 #define DL_OPENGL "libobs-opengl.dll"
 #define DL_D3D9   ""
@@ -87,8 +91,8 @@ private:
     bool initService();
     bool resetOutputs();
 
-    bool setupRecord();
-    bool setupStream();
+    bool setupRecording();
+    bool setupStreaming();
 
     void addFilterToSource(obs_source_t *, const char *);
 

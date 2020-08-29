@@ -1,5 +1,5 @@
 ﻿/******************************************************************************
-    Copyright (C) 2020 by Zaodao(Dalian) Education Technology Co., Ltd..
+    Copyright (C) 2020 by Zaodao(Dalian) Education Technology Co., Ltd.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -183,7 +183,7 @@ static void LogHandler(int level, const char *format, va_list args, void *param)
 
     vsnprintf_s(str, sizeof(str), format, args);
 
-    qInfo() << str;
+    qInfo() << "--" << str;
 }
 
 static void AddFilterToAudioInput(const char *id)
@@ -210,7 +210,7 @@ static void AddFilterToAudioInput(const char *id)
     if (filter) {
         const char *sourceName = obs_source_get_name(source);
 
-        blog(LOG_INFO, "added filter '%s' (%s) to source '%s'", name.c_str(),
+        blog(LOG_INFO, "Added filter '%s' (%s) to source '%s'.", name.c_str(),
              id, sourceName);
 
         obs_source_filter_add(source, filter);
@@ -332,7 +332,7 @@ static bool FindSceneItemAndScale(obs_scene_t *scene, obs_sceneitem_t *item,
         vec2_set(&pos, (baseSize.width() - width) / 2, 0);
     obs_sceneitem_set_pos(item, &pos);
 
-    blog(LOG_INFO, "scene scale %f %f", scale.x, scale.y);
+    blog(LOG_INFO, "Scene scale ratio : %f %f.", scale.x, scale.y);
     return true;
 }
 
@@ -373,7 +373,7 @@ static void RecordingStopped(void *data, calldata_t *params)
     switch (code)
     {
     case OBS_OUTPUT_SUCCESS:
-        blog(LOG_INFO, "recording finished!");
+        blog(LOG_INFO, "Recording finished!");
         UNUSED_PARAMETER(data);
         break;
     case OBS_OUTPUT_NO_SPACE:
@@ -385,7 +385,8 @@ static void RecordingStopped(void *data, calldata_t *params)
     default:
         {
             const char *last_error = calldata_string(params, "last_error");
-            blog(LOG_ERROR, "record error, code=%d,error=%s", code, last_error);
+            blog(LOG_ERROR, "Record error, code = %d, error = %s.",
+                 code, last_error);
         }
         msg = QString("发生未指定错误 (Code:%1)！").arg(code);
         break;
@@ -427,7 +428,7 @@ static void StreamingStopped(void *data, calldata_t *params)
     switch (code)
     {
     case OBS_OUTPUT_SUCCESS:
-        blog(LOG_INFO, "streaming finished!");
+        blog(LOG_INFO, "Streaming finished!");
         UNUSED_PARAMETER(data);
         break;
     case OBS_OUTPUT_BAD_PATH:
@@ -448,7 +449,8 @@ static void StreamingStopped(void *data, calldata_t *params)
     default:
         {
             const char *last_error = calldata_string(params, "last_error");
-            blog(LOG_ERROR, "stream error, code=%d,error=%s", code, last_error);
+            blog(LOG_ERROR, "Stream error, code = %d, error = %s.",
+                 code, last_error);
         }
         msg = QString("发生未指定错误 (Code:%1)！").arg(code);
         break;
@@ -513,7 +515,7 @@ ZDTalkOBSContext::~ZDTalkOBSContext()
 
     obs_shutdown();
 
-    blog(LOG_INFO, "memory leaks: %ld", bnum_allocs());
+    blog(LOG_INFO, "Memory leaks: %ld.", bnum_allocs());
     base_set_log_handler(nullptr, nullptr);
 }
 
@@ -570,8 +572,8 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
 
     if (configPath.isEmpty() || title.isEmpty() ||
             screenSize.isEmpty() || sourceRegion.isEmpty()) {
-        blog(LOG_ERROR, "init param invalid, window title=%s, path=%s, "
-                        "screen:%dx%d, orignal:(%d,%d %dx%d)",
+        blog(LOG_ERROR, "Init param invalid, window title=%s, path=%s, "
+                        "screen:%dx%d, orignal:(%d,%d %dx%d).",
              title.toStdString().c_str(),
              configPath.toStdString().c_str(),
              screenSize.width(), screenSize.height(),
@@ -621,17 +623,17 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
     this->outputHeight = out_cy;
     this->orgWidth     = sourceRegion.width();
     this->orgHeight    = sourceRegion.height();
-    blog(LOG_INFO, "final resolution => org=%dx%d, base=%dx%d, output=%dx%d",
+    blog(LOG_INFO, "Final resolution => org=%dx%d, base=%dx%d, output=%dx%d.",
          orgWidth, orgHeight, baseWidth, baseHeight, outputWidth, outputHeight);
 
     // 全局设置
     if (!obs_initialized()) {
 
-        blog(LOG_INFO, "obs version %u", obs_get_version());
+        blog(LOG_INFO, "OBS version %u.", obs_get_version());
 
         if (!obs_startup(ZDTALK_OBS_DEFAULT_LOCALE,
                          configPath.toStdString().c_str(), nullptr)) {
-            blog(LOG_ERROR, "startup fail");
+            blog(LOG_ERROR, "Startup failed!");
             emit errorOccurred(ErrorInitializing, QStringLiteral("启动失败"));
             return;
         }
@@ -653,7 +655,7 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
 
     // 音视频配置
     if (!resetAudio()) {
-        blog(LOG_ERROR, "reset audio fail");
+        blog(LOG_ERROR, "Reset audio failed.");
         emit errorOccurred(ErrorInitializing, QStringLiteral("音频设置失败"));
         return;
     }
@@ -663,19 +665,19 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
     if (ret != OBS_VIDEO_SUCCESS) {
         switch (ret) {
         case OBS_VIDEO_MODULE_NOT_FOUND:
-            blog(LOG_ERROR, "failed to initialize video: graphics module not found");
+            blog(LOG_ERROR, "Failed to initialize video: graphics module not found.");
             break;
         case OBS_VIDEO_NOT_SUPPORTED:
-            blog(LOG_ERROR, "unsupported");
+            blog(LOG_ERROR, "Unsupported.");
             break;
         case OBS_VIDEO_INVALID_PARAM:
-            blog(LOG_ERROR, "failed to initialize video: invalid parameters");
+            blog(LOG_ERROR, "Failed to initialize video: invalid parameters.");
             break;
         default:
-            blog(LOG_ERROR, "unknown");
+            blog(LOG_ERROR, "Unknown.");
             break;
         }
-        blog(LOG_ERROR, "reset video fail");
+        blog(LOG_ERROR, "Reset video failed.");
         emit errorOccurred(ErrorInitializing, QStringLiteral("视频设置失败"));
         return;
     }
@@ -684,7 +686,7 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
 #if defined(_WIN32) || defined(__APPLE__)
     obs_set_audio_monitoring_device(ZDTALK_TAG "-audio-monitor-default",
                                     ZDTALK_AUDIO_MONITOR_ID);
-    blog(LOG_INFO, "audio monitoring device:\tname: %s\tid: %s",
+    blog(LOG_INFO, "Audio monitoring device:\tname: %s\tid: %s.",
          ZDTALK_TAG "-AudioMonitorDefault",
          ZDTALK_AUDIO_MONITOR_ID);
 #endif
@@ -716,9 +718,9 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
 
 #ifdef _WIN32
     uint32_t winVer = GetWindowsVersion();
-    blog(LOG_INFO, "windows version %x", winVer);
+    blog(LOG_INFO, "Windows version %x.", winVer);
     if (winVer > 0 && winVer < 0x602) {
-        blog(LOG_INFO, "set aero enable");
+        blog(LOG_INFO, "Set aero enabled.");
         SetAeroEnabled(true);
     }
 #endif
@@ -735,14 +737,14 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
             if (strcmp(id, ZDTALK_TRANSITION_ID) == 0) {
                 const char *name = obs_source_get_display_name(id);
                 obs_source_t *tr = obs_source_create_private(id, name, NULL);
-                blog(LOG_INFO, "transition saved");
+                blog(LOG_INFO, "Transition saved.");
                 transition = tr;
                 break;
             }
         }
     }
     if (!transition) {
-        blog(LOG_ERROR, "not find transition");
+        blog(LOG_ERROR, "Transition is not found.");
         emit errorOccurred(ErrorInitializing, QStringLiteral("创建转换器失败"));
         return;
     }
@@ -752,7 +754,7 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
     // 创建场景
     scene = obs_scene_create(ZDTALK_TAG "-Scene");
     if (!scene) {
-        blog(LOG_ERROR, "create scene fail");
+        blog(LOG_ERROR, "Create scene failed.");
         emit errorOccurred(ErrorInitializing, QStringLiteral("创建场景失败"));
         return;
     }
@@ -782,7 +784,7 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
     if (captureSource) {
         obs_scene_atomic_update(scene, AddSource, captureSource);
     } else {
-        blog(LOG_ERROR, "create source fail");
+        blog(LOG_ERROR, "Create source failed.");
         emit errorOccurred(ErrorInitializing, QStringLiteral("创建源失败"));
         return;
     }
@@ -797,7 +799,7 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
     addFilterToSource(captureSource, ZDTALK_VIDEO_CROP_FILTER_ID);
 
     blog(LOG_INFO, OBS_SEPARATOR);
-    blog(LOG_INFO, "exe desc %s", title.toStdString().c_str());
+    blog(LOG_INFO, "Application desc is %s.", title.toStdString().c_str());
     properties = obs_source_properties(captureSource);
     obs_property_t *property = obs_properties_first(properties);
     while (property) {
@@ -807,10 +809,10 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
             const char *string = nullptr;
             for (size_t i = 0; i < count; i++) {
                 const char *name = obs_property_list_item_name(property, i);
-                blog(LOG_INFO, "window list item name=%s", name);
+                blog(LOG_INFO, "Window list item name = %s.", name);
                 if (title == QString::fromUtf8(name)) {
                     string = obs_property_list_item_string(property, i);
-                    blog(LOG_INFO, "!!!Found item=%s", string);
+                    blog(LOG_INFO, "!!!Found item = %s.", string);
                     break;
                 }
             }
@@ -819,7 +821,7 @@ void ZDTalkOBSContext::initialize(const QString &configPath,
                 obs_source_update(captureSource, setting);
                 break;
             } else {
-                blog(LOG_INFO, "find application window fail");
+                blog(LOG_INFO, "Find application's window failed.");
                 obs_data_release(setting);
                 emit errorOccurred(ErrorInitializing, QStringLiteral("查找应用窗口失败"));
                 return;
@@ -849,7 +851,7 @@ void ZDTalkOBSContext::addFilterToSource(obs_source_t *source, const char *id)
     std::string name = obs_source_get_display_name(id);
     existing_filter = obs_source_get_filter_by_name(source, name.c_str());
     if (existing_filter) {
-        blog(LOG_WARNING, "filter %s exists.", id);
+        blog(LOG_WARNING, "Filter %s exists.", id);
         obs_source_release(existing_filter);
         return;
     }
@@ -858,7 +860,7 @@ void ZDTalkOBSContext::addFilterToSource(obs_source_t *source, const char *id)
     obs_source_t *filter = obs_source_create(id, name.c_str(), nullptr, nullptr);
     if (filter) {
         const char *sourceName = obs_source_get_name(source);
-        blog(LOG_INFO, "add filter '%s' (%s) to source '%s'",
+        blog(LOG_INFO, "Add filter '%s' (%s) to source '%s'.",
              name.c_str(), id, sourceName);
         obs_source_filter_add(source, filter);
         obs_source_release(filter);
@@ -870,7 +872,7 @@ void ZDTalkOBSContext::cropVideo(const QRect &rect)
     if (!captureSource) return;
 
     if (rect.isEmpty()) {
-        blog(LOG_WARNING, "source crop rect(%d %d %d %d) is empty.",
+        blog(LOG_WARNING, "Source crop rect(%d %d %d %d) is empty.",
              rect.left(), rect.top(), rect.right(), rect.bottom());
         return;
     }
@@ -887,12 +889,12 @@ void ZDTalkOBSContext::cropVideo(const QRect &rect)
         if (relative) {
             obs_data_set_int(settings, "right", rect.right());
             obs_data_set_int(settings, "bottom", rect.bottom());
-            blog(LOG_INFO, "update source crop [Left:%d Top:%d Right:%d Bottom:%d]",
+            blog(LOG_INFO, "Update source crop [Left:%d Top:%d Right:%d Bottom:%d].",
                  rect.left(), rect.top(), rect.right(), rect.bottom());
         } else {
             obs_data_set_int(settings, "cx", rect.width());
             obs_data_set_int(settings, "cy", rect.height());
-            blog(LOG_INFO, "update source crop [Left:%d Top:%d Width:%d Height:%d]",
+            blog(LOG_INFO, "Update source crop [Left:%d Top:%d Width:%d Height:%d].",
                  rect.left(), rect.top(), rect.width(), rect.height());
         }
         obs_source_update(existing_filter, settings);
@@ -909,7 +911,7 @@ bool ZDTalkOBSContext::initService()
         rtmpService = obs_service_create("rtmp_custom", ZDTALK_TAG "-RtmpService",
                                          nullptr, nullptr);
         if (!rtmpService) {
-            blog(LOG_ERROR, "create service fail");
+            blog(LOG_ERROR, "Create service failed.");
             return false;
         }
         obs_service_release(rtmpService);
@@ -924,7 +926,7 @@ bool ZDTalkOBSContext::resetOutputs()
                                          ZDTALK_TAG "-AdvRtmpOutput",
                                          nullptr, nullptr);
         if (!streamOutput) {
-            blog(LOG_ERROR, "create stream output fail");
+            blog(LOG_ERROR, "Create stream output failed.");
             return false;
         }
         obs_output_release(streamOutput);
@@ -935,7 +937,7 @@ bool ZDTalkOBSContext::resetOutputs()
                                          ZDTALK_TAG "-AdvFFmpegOutput",
                                          nullptr, nullptr);
         if (!recordOutput) {
-            blog(LOG_ERROR, "create record output fail");
+            blog(LOG_ERROR, "Create record output failed.");
             return false;
         }
         obs_output_release(recordOutput);
@@ -947,7 +949,7 @@ bool ZDTalkOBSContext::resetOutputs()
                                                  ZDTALK_TAG "-StreamingH264",
                                                  streamEncSettings, nullptr);
         if (!h264Streaming) {
-            blog(LOG_ERROR, "create streaming encoder fail");
+            blog(LOG_ERROR, "Create streaming encoder failed.");
             return false;
         }
         obs_encoder_release(h264Streaming);
@@ -968,7 +970,7 @@ bool ZDTalkOBSContext::resetOutputs()
         if (!aacTrack[i]) {
             if (!CreateAACEncoder(aacTrack[i], aacEncoderID[i], name.c_str(), i,
                                   setting)) {
-                blog(LOG_ERROR, "create audio encoder %d", i);
+                blog(LOG_ERROR, "Create audio encoder %d.", i);
                 obs_data_release(setting);
                 return false;
             }
@@ -1014,9 +1016,9 @@ int ZDTalkOBSContext::resetVideo()
 
     if (IS_WIN32 && ret != OBS_VIDEO_SUCCESS) {
         if (strcmp(ovi.graphics_module, DL_OPENGL) != 0) {
-            blog(LOG_WARNING, "failed to initialize obs video (%d) "
+            blog(LOG_WARNING, "Failed to initialize obs video (%d) "
                               "with graphics_module='%s', retrying "
-                              "with graphics_module='%s'",
+                              "with graphics_module='%s'.",
                  ret, ovi.graphics_module, DL_OPENGL);
             ovi.graphics_module = DL_OPENGL;
             ret = obs_reset_video(&ovi);
@@ -1057,7 +1059,7 @@ void ZDTalkOBSContext::resetAudioInput(const QString &/*deviceId*/,
             const char *name = obs_property_list_item_name(inputs, i);
             const char *id = obs_property_list_item_string(inputs, i);
             if (QString(name).contains(deviceDesc)) {
-                blog(LOG_INFO, "reset audio input use %s", name);
+                blog(LOG_INFO, "Reset audio input, use %s.", name);
                 ResetAudioDevice(ZDTALK_AUDIO_INPUT_SOURCE_ID, id, name,
                                  ZDTALK_AUDIO_INPUT_INDEX);
                 find = true;
@@ -1070,7 +1072,7 @@ void ZDTalkOBSContext::resetAudioInput(const QString &/*deviceId*/,
     if (!find) {
         if (QString(currentDeviceId) !=
                 QString(ZDTALK_AUDIO_INPUT_DEVICE_ID)) {
-            blog(LOG_INFO, "reset audio input use \"default\"");
+            blog(LOG_INFO, "Reset audio input, use \"default\".");
             ResetAudioDevice(ZDTALK_AUDIO_INPUT_SOURCE_ID,
                              ZDTALK_AUDIO_INPUT_DEVICE_ID,
                              ZDTALK_TAG "-Default Mic/Aux",
@@ -1107,7 +1109,7 @@ void ZDTalkOBSContext::resetAudioOutput(const QString &/*deviceId*/,
             const char *name = obs_property_list_item_name(outputs, i);
             const char *id = obs_property_list_item_string(outputs, i);
             if (QString(name).contains(deviceDesc)) {
-                blog(LOG_INFO, "reset audio output use %s", name);
+                blog(LOG_INFO, "Reset audio output, use %s.", name);
                 ResetAudioDevice(ZDTALK_AUDIO_OUTPUT_SOURCE_ID, id, name,
                                  ZDTALK_AUDIO_OUTPUT_INDEX);
                 find = true;
@@ -1120,7 +1122,7 @@ void ZDTalkOBSContext::resetAudioOutput(const QString &/*deviceId*/,
     if (!find) {
         if (QString(currentDeviceId) !=
                 QString(ZDTALK_AUDIO_OUTPUT_DEVICE_ID)) {
-            blog(LOG_INFO, "reset audio output use \"default\"");
+            blog(LOG_INFO, "Reset audio output, use \"default\".");
             ResetAudioDevice(ZDTALK_AUDIO_OUTPUT_SOURCE_ID,
                              ZDTALK_AUDIO_OUTPUT_DEVICE_ID,
                              ZDTALK_TAG "-Default Desktop Audio",
@@ -1136,7 +1138,7 @@ void ZDTalkOBSContext::downmixMonoInput(bool enable)
     if (source) {
         uint32_t flags = obs_source_get_flags(source);
         bool forceMonoActive = (flags & OBS_SOURCE_FLAG_FORCE_MONO) != 0;
-        blog(LOG_INFO, "audio input force mono %d", forceMonoActive);
+        blog(LOG_INFO, "Audio input force mono %d.", forceMonoActive);
         if (forceMonoActive != enable) {
             if (enable)
                 flags |= OBS_SOURCE_FLAG_FORCE_MONO;
@@ -1155,7 +1157,7 @@ void ZDTalkOBSContext::downmixMonoOutput(bool enable)
     if (source) {
         uint32_t flags = obs_source_get_flags(source);
         bool forceMonoActive = (flags & OBS_SOURCE_FLAG_FORCE_MONO) != 0;
-        blog(LOG_INFO, "audio output force mono %d", forceMonoActive);
+        blog(LOG_INFO, "Audio output force mono %d.", forceMonoActive);
         if (forceMonoActive != enable) {
             if (enable)
                 flags |= OBS_SOURCE_FLAG_FORCE_MONO;
@@ -1174,7 +1176,7 @@ void ZDTalkOBSContext::muteAudioInput(bool mute)
     if (source) {
         bool old = obs_source_muted(source);
 //        if (old != mute) {
-        blog(LOG_INFO, "mute audio input from:%d to:%d", old, mute);
+        blog(LOG_INFO, "Mute audio input from:%d to:%d.", old, mute);
         obs_source_set_muted(source, mute);
 //        }
         obs_source_release(source);
@@ -1188,7 +1190,7 @@ void ZDTalkOBSContext::muteAudioOutput(bool mute)
     if (source) {
         bool old = obs_source_muted(source);
 //        if (old != mute) {
-        blog(LOG_INFO, "mute audio output from:%d to:%d", old, mute);
+        blog(LOG_INFO, "Mute audio output from:%d to:%d.", old, mute);
         obs_source_set_muted(source, mute);
 //        }
         obs_source_release(source);
@@ -1212,7 +1214,7 @@ OBSData ZDTalkOBSContext::getStreamEncSettings()
     return dataRet;
 }
 
-bool ZDTalkOBSContext::setupRecord()
+bool ZDTalkOBSContext::setupRecording()
 {
     obs_data_t *settings = obs_data_create();
 
@@ -1249,7 +1251,7 @@ bool ZDTalkOBSContext::setupRecord()
     return true;
 }
 
-bool ZDTalkOBSContext::setupStream()
+bool ZDTalkOBSContext::setupStreaming()
 {
     OBSData settings = obs_data_create();
     obs_data_release(settings);
@@ -1267,7 +1269,7 @@ bool ZDTalkOBSContext::setupStream()
 void ZDTalkOBSContext::startRecording(const QString &output)
 {
     if (output.isEmpty()) {
-        blog(LOG_ERROR, "record parameter invalid, outputPath=%s",
+        blog(LOG_ERROR, "Recording parameter invalid, outputPath=%s.",
              output.toStdString().c_str());
         emit errorOccurred(ErrorRecording, QStringLiteral("参数错误"));
         return;
@@ -1276,13 +1278,13 @@ void ZDTalkOBSContext::startRecording(const QString &output)
     if (QString(filePath).compare(output) != 0) {
         if (filePath) free(filePath);
         filePath = _strdup(output.toStdString().c_str());
-        blog(LOG_INFO, "record output file path %s", filePath);
+        blog(LOG_INFO, "Record output file path is %s.", filePath);
     }
 
-    setupRecord();
+    setupRecording();
 
     if (!obs_output_start(recordOutput)) {
-        blog(LOG_ERROR, "record start failed.");
+        blog(LOG_ERROR, "Recording start failed.");
         emit errorOccurred(ErrorRecording, QStringLiteral("启动失败"));
         return;
     }
@@ -1302,7 +1304,7 @@ void ZDTalkOBSContext::stopRecording(bool force)
 void ZDTalkOBSContext::startStreaming(const QString &server, const QString &key)
 {
     if (server.isEmpty() || key.isEmpty()) {
-        blog(LOG_ERROR, "stream parameter invalid, server=%s, key=%s",
+        blog(LOG_ERROR, "Streaming parameter invalid, server=%s, key=%s.",
              server.toStdString().c_str(), key.toStdString().c_str());
         emit errorOccurred(ErrorStreaming, QStringLiteral("参数错误"));
         return;
@@ -1314,13 +1316,13 @@ void ZDTalkOBSContext::startStreaming(const QString &server, const QString &key)
         if (liveKey) free(liveKey);
         liveServer = _strdup(server.toStdString().c_str());
         liveKey = _strdup(key.toStdString().c_str());
-        blog(LOG_INFO, "stream url server:%s key:%s", liveServer, liveKey);
+        blog(LOG_INFO, "Streaming url is server:%s key:%s.", liveServer, liveKey);
     }
 
-    setupStream();
+    setupStreaming();
 
     if (!obs_output_start(streamOutput)) {
-        blog(LOG_ERROR, "stream start fail");
+        blog(LOG_ERROR, "Streaming start failed.");
         emit errorOccurred(ErrorStreaming, QStringLiteral("启动失败"));
         return;
     }
@@ -1330,7 +1332,7 @@ void ZDTalkOBSContext::startStreaming(const QString &server, const QString &key)
 
     firstTotal = obs_output_get_total_frames(streamOutput);
     firstDropped = obs_output_get_frames_dropped(streamOutput);
-    blog(LOG_INFO, "first total:%d, dropped:%d", firstTotal, firstDropped);
+    blog(LOG_INFO, "First total:%d, dropped:%d.", firstTotal, firstDropped);
 }
 
 void ZDTalkOBSContext::stopStreaming(bool force)
@@ -1368,12 +1370,12 @@ void ZDTalkOBSContext::scaleVideo(const QSize &size)
     orgWidth = size.width();
     orgHeight = size.height();
 
-    blog(LOG_INFO, "scale scene to %dx%d", orgWidth, orgHeight);
+    blog(LOG_INFO, "Scale scene to %dx%d.", orgWidth, orgHeight);
 
     if (scene)
         obs_scene_enum_items(scene, FindSceneItemAndScale, (void *)this);
     else
-        blog(LOG_WARNING, "obs scene is not created, cannot scale");
+        blog(LOG_WARNING, "Scene is not created, cannot scale.");
     /*
     if (!sceneitem)
         return;
@@ -1450,7 +1452,7 @@ void ZDTalkOBSContext::logStreamStats()
     dropped -= firstDropped;
     num = total ? (long double)dropped / (long double)total * 100.0l : 0.0l;
 
-    blog(LOG_INFO, "obs stream stat, bitrate:%.2lf kb/s, frames:%d / %d (%.2lf%%)",
+    blog(LOG_INFO, "Streaming stat => bitrate:%.2lf kb/s, frames:%d / %d (%.2lf%%).",
          kbps, dropped, total, num);
 
     lastBytesSent     = bytesSent;
